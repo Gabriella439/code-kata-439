@@ -25,3 +25,13 @@ score = go 1 1
         Pair x y:rolls' ->
             x * m1 + y * m2
           + (if (x + y) == 10 then go 2 else go 1) 1 rolls'
+
+showFrame :: Frame -> String
+showFrame frame = case frame of
+    Strike   -> " X"
+    Pair x y
+      | x + y == 10 -> showRoll x ++ "/"
+      | otherwise   -> showRoll x ++ showRoll y
+  where
+    showRoll 0 = "-"
+    showRoll x = show x
