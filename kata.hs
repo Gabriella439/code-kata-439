@@ -47,8 +47,8 @@ showFrameDisplay = showFrameRow
 
 showFrameRow :: [Frame] -> [String]
 showFrameRow frames = map formatCells
-    [ map showFrame frames
-    , map (show . score) $ inits frames
+    [ map showFrame $ frames
+    , map (show . score) . tail . inits $ frames
     ]
   where
     pad :: Int -> String -> String
@@ -61,20 +61,20 @@ showFrameRow frames = map formatCells
     formatCells = concat . intersperse "|" . map (pad 3) . extend 10
 
 
+type Game = [[Roll]]
+
+showGame :: Game -> Maybe [[String]]
+showGame = traverse (fmap showFrameRow . rollsToFrames)
+
+
 displayFrames :: [Frame] -> IO ()
 displayFrames = mapM_ putStrLn . showFrameDisplay
 
 displayRolls :: [Roll] -> IO ()
 displayRolls = maybe showError displayFrames . rollsToFrames
   where
+
     showError = putStrLn "invalid rolls"
-
-
-type Game = [[Roll]]
-
-showGame :: Game -> Maybe [[String]]
-showGame = traverse (fmap showFrameRow . rollsToFrames)
-
 displayGame :: Game -> IO ()
 displayGame = maybe showErr ((mapM_.mapM_) putStrLn) . showGame
   where
