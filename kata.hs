@@ -10,6 +10,12 @@ rollsToFrames rolls = case rolls of
     x:[]       -> Nothing
     x:y:rolls' -> fmap (Pair x y:) (rollsToFrames rolls')
 
+framesToRolls :: [Frame] -> [Roll]
+framesToRolls frames = case frames of
+    []            -> []
+    Pair x y : xs -> x : y : framesToRolls xs
+    Strike : xs   -> 10 : framesToRolls xs
+
 score :: [Frame] -> Score
 score = go 1 1
   where
