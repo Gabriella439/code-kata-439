@@ -1,3 +1,7 @@
+import Data.List ( inits, intersperse )
+import Data.Traversable ( traverse )
+
+
 type Roll  = Int
 type Score = Int
 
@@ -26,6 +30,7 @@ score = go 1 1
             x * m1 + y * m2
           + (if (x + y) == 10 then go 2 else go 1) 1 rolls'
 
+
 showFrame :: Frame -> String
 showFrame frame = case frame of
     Strike   -> " X"
@@ -35,3 +40,42 @@ showFrame frame = case frame of
   where
     showRoll 0 = "-"
     showRoll x = show x
+
+
+showFrameDisplay :: [Frame] -> [String]
+showFrameDisplay = showFrameRow
+
+showFrameRow :: [Frame] -> [String]
+showFrameRow frames = map formatCells
+    [ map showFrame frames
+    , map (show . score) $ inits frames
+    ]
+  where
+    pad :: Int -> String -> String
+    pad n s = replicate (n - length s) ' ' ++ s
+
+    extend :: Int -> [[a]] -> [[a]]
+    extend n xs = xs ++ replicate (n - length xs) []
+
+    formatCells :: [String] -> String
+    formatCells = concat . intersperse "|" . map (pad 3) . extend 10
+
+
+displayFrames :: [Frame] -> IO ()
+displayFrames = mapM_ putStrLn . showFrameDisplay
+
+displayRolls :: [Roll] -> IO ()
+displayRolls = maybe showError displayFrames . rollsToFrames
+  where
+    showError = putStrLn "invalid rolls"
+
+
+type Game = [[Roll]]
+
+showGame :: Game -> Maybe [[String]]
+showGame = traverse (fmap showFrameRow . rollsToFrames)
+
+displayGame :: Game -> IO ()
+displayGame = maybe showErr ((mapM_.mapM_) putStrLn) . showGame
+  where
+    showErr = putStrLn "invalid game"
